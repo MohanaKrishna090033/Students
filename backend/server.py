@@ -17,14 +17,16 @@ load_dotenv(ROOT_DIR / '.env')
 
 # MongoDB connection
 mongo_url = os.environ['MONGO_URL']
-# Add TLS options to handle SSL handshake issues in containerized environments
+# Updated MongoDB connection with proper SSL/TLS configuration for Atlas
 client = AsyncIOMotorClient(
-    mongo_url, 
-    tls=True, 
+    mongo_url,
+    tls=True,
     tlsAllowInvalidCertificates=False,
     serverSelectionTimeoutMS=5000,
     connectTimeoutMS=5000,
-    socketTimeoutMS=5000
+    socketTimeoutMS=5000,
+    maxPoolSize=50,
+    retryWrites=True
 )
 db = client[os.environ['DB_NAME']]
 
