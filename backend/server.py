@@ -17,17 +17,8 @@ load_dotenv(ROOT_DIR / '.env')
 
 # MongoDB connection
 mongo_url = os.environ['MONGO_URL']
-# Updated MongoDB connection with proper SSL/TLS configuration for Atlas
-client = AsyncIOMotorClient(
-    mongo_url,
-    tls=True,
-    tlsAllowInvalidCertificates=False,
-    serverSelectionTimeoutMS=5000,
-    connectTimeoutMS=5000,
-    socketTimeoutMS=5000,
-    maxPoolSize=50,
-    retryWrites=True
-)
+# Use local MongoDB - no SSL configuration needed
+client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ['DB_NAME']]
 
 # Create the main app without a prefix
