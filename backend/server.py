@@ -152,43 +152,163 @@ async def get_llm_chat(provider: str, model: str, system_message: str, session_i
     
     return chat
 
-# Predefined bilingual content
+# Predefined bilingual content - Expanded Curriculum
 PREDEFINED_QUESTS = [
+    # MATH - GRADE 1
     {
         "title": "Help the Farmer Count Mangoes",
         "title_odia": "କୃଷକଙ୍କୁ ଆମ୍ବ ଗଣିବାରେ ସାହାଯ୍ୟ କରନ୍ତୁ",
-        "description": "A friendly farmer needs help counting mangoes in his orchard",
-        "description_odia": "ଜଣେ ବନ୍ଧୁ କୃଷକଙ୍କୁ ତାଙ୍କର ବଗିଚାରେ ଆମ୍ବ ଗଣିବାରେ ସାହାଯ୍ୟ ଦରକାର",
+        "description": "Learn counting 1-50 by helping farmer Raju count mangoes",
+        "description_odia": "କୃଷକ ରାଜୁଙ୍କୁ ଆମ୍ବ ଗଣିବାରେ ସାହାଯ୍ୟ କରି ୧-୫୦ ଗଣନା ଶିଖନ୍ତୁ",
         "subject": Subject.MATH,
         "grade": 1,
         "difficulty": Difficulty.EASY,
         "xp_reward": 50,
-        "story_context": "In a beautiful village near Puri, farmer Raju has a mango orchard. Help him count the ripe mangoes so he can sell them at the market!",
-        "story_context_odia": "ପୁରୀ ନିକଟସ୍ଥ ଏକ ସୁନ୍ଦର ଗାଁରେ, କୃଷକ ରାଜୁଙ୍କର ଆମ୍ବ ବଗିଚା ଅଛି। ତାଙ୍କୁ ପାଚିଲା ଆମ୍ବ ଗଣିବାରେ ସାହାଯ୍ୟ କର ଯାହାଫଳରେ ସେ ବଜାରରେ ବିକ୍ରି କରିପାରିବ!",
+        "story_context": "In Puri village, farmer Raju grows the sweetest mangoes in all of Odisha! Help him count his harvest.",
+        "story_context_odia": "ପୁରୀ ଗାଁରେ, କୃଷକ ରାଜୁ ସମଗ୍ର ଓଡ଼ିଶାରେ ସବୁଠାରୁ ମିଠା ଆମ୍ବ ଚାଷ କରନ୍ତି! ତାଙ୍କର ଅମଳ ଗଣିବାରେ ସାହାଯ୍ୟ କରନ୍ତୁ।",
         "questions": [
             {
                 "id": "q1",
-                "question": "How many mangoes do you see?",
-                "question_odia": "ତୁମେ କେତୋଟି ଆମ୍ବ ଦେଖୁଛ?",
+                "question": "How many mangoes do you see on the tree?",
+                "question_odia": "ଗଛରେ ତୁମେ କେତୋଟି ଆମ୍ବ ଦେଖୁଛ?",
                 "type": "counting",
                 "image_url": "https://images.unsplash.com/photo-1502086223501-7ea6ecd79368",
-                "correct_answer": "5",
-                "options": ["3", "5", "7", "9"]
+                "correct_answer": "15",
+                "options": ["12", "15", "18", "20"]
             }
         ],
         "order": 1
     },
     {
-        "title": "Protect the Village - Learn About Rivers",
-        "title_odia": "ଗାଁକୁ ରକ୍ଷା କର - ନଦୀ ବିଷୟରେ ଜାଣ",
-        "description": "Become a village protector by learning about Odisha's rivers",
-        "description_odia": "ଓଡ଼ିଶାର ନଦୀ ବିଷୟରେ ଜାଣି ଗାଁର ରକ୍ଷକ ହୁଅ",
-        "subject": Subject.SOCIAL_STUDIES,
+        "title": "Shape Detective in Konark Temple",
+        "title_odia": "କୋଣାର୍କ ମନ୍ଦିରରେ ଆକୃତି ଗୋଇଣ୍ଡା",
+        "description": "Discover shapes and patterns in the famous Konark Sun Temple",
+        "description_odia": "ପ୍ରସିଦ୍ଧ କୋଣାର୍କ ସୂର୍ଯ୍ୟ ମନ୍ଦିରରେ ଆକୃତି ଏବଂ ନମୁନା ଆବିଷ୍କାର କରନ୍ତୁ",
+        "subject": Subject.MATH,
         "grade": 1,
         "difficulty": Difficulty.EASY,
         "xp_reward": 60,
-        "story_context": "The wise village elder needs your help to protect the village from floods. Learn about the sacred rivers of Odisha!",
-        "story_context_odia": "ଜ୍ଞାନୀ ଗାଁର ପ୍ରାଚୀନ ବନ୍ୟାରୁ ଗାଁକୁ ରକ୍ଷା କରିବା ପାଇଁ ତୁମର ସାହାଯ୍ୟ ଦରକାର। ଓଡ଼ିଶାର ପବିତ୍ର ନଦୀଗୁଡ଼ିକ ବିଷୟରେ ଜାଣ!",
+        "story_context": "The ancient Konark Temple has beautiful patterns carved in stone. Let's explore geometric shapes!",
+        "story_context_odia": "ପ୍ରାଚୀନ କୋଣାର୍କ ମନ୍ଦିରରେ ପଥରରେ ଖୋଦିତ ସୁନ୍ଦର ନମୁନା ଅଛି। ଚାଲ ଜ୍ୟାମିତିକ ଆକୃତି ଅନ୍ୱେଷଣ କରିବା!",
+        "questions": [
+            {
+                "id": "q1",
+                "question": "What shape is the wheel of Konark temple?",
+                "question_odia": "କୋଣାର୍କ ମନ୍ଦିରର ଚକ କି ଆକୃତିର?",
+                "type": "multiple_choice",
+                "correct_answer": "Circle",
+                "options": ["Square", "Triangle", "Circle", "Rectangle"]
+            }
+        ],
+        "order": 2
+    },
+    # MATH - GRADE 2
+    {
+        "title": "Jagannath Temple Market Addition",
+        "title_odia": "ଜଗନ୍ନାଥ ମନ୍ଦିର ବଜାର ଯୋଗ",
+        "description": "Practice addition up to 100 while shopping in Puri market",
+        "description_odia": "ପୁରୀ ବଜାରରେ କିଣାକାଟା କରିବା ସମୟରେ ୧୦୦ ପର୍ଯ୍ୟନ୍ତ ଯୋଗ ଅଭ୍ୟାସ କରନ୍ତୁ",
+        "subject": Subject.MATH,
+        "grade": 2,
+        "difficulty": Difficulty.MEDIUM,
+        "xp_reward": 70,
+        "story_context": "Visit the bustling Puri market near Jagannath Temple and help the shopkeeper calculate prices!",
+        "story_context_odia": "ଜଗନ୍ନାଥ ମନ୍ଦିର ନିକଟସ୍ଥ ବ୍ୟସ୍ତବହୁଳ ପୁରୀ ବଜାର ପରିଦର୍ଶନ କରନ୍ତୁ ଏବଂ ଦୋକାନୀଙ୍କୁ ଦାମ ଗଣନା କରିବାରେ ସାହାଯ୍ୟ କରନ୍ତୁ!",
+        "questions": [
+            {
+                "id": "q1",
+                "question": "If prasad costs 45 rupees and flowers cost 35 rupees, what's the total?",
+                "question_odia": "ଯଦି ପ୍ରସାଦ ୪୫ ଟଙ୍କା ଏବଂ ଫୁଲ ୩୫ ଟଙ୍କା, ମୋଟ କେତେ?",
+                "type": "word_problem",
+                "correct_answer": "80",
+                "options": ["75", "80", "85", "90"]
+            }
+        ],
+        "order": 3
+    },
+    {
+        "title": "Time for Odissi Dance Class",
+        "title_odia": "ଓଡ଼ିଶୀ ନୃତ୍ୟ କ୍ଲାସ ପାଇଁ ସମୟ",
+        "description": "Learn to tell time with hours and half-hours during dance practice",
+        "description_odia": "ନୃତ୍ୟ ଅଭ୍ୟାସ ସମୟରେ ଘଣ୍ଟା ଏବଂ ଅଧା ଘଣ୍ଟା ସହିତ ସମୟ କହିବା ଶିଖନ୍ତୁ",
+        "subject": Subject.MATH,
+        "grade": 2,
+        "difficulty": Difficulty.MEDIUM,
+        "xp_reward": 75,
+        "story_context": "Maya learns classical Odissi dance. Help her understand when her classes start!",
+        "story_context_odia": "ମାୟାକ୍ଳାସିକ୍ ଓଡ଼ିଶୀ ନୃତ୍ୟ ଶିଖୁଛି। ତାର କ୍ଲାସ କେବେ ଆରମ୍ଭ ହୁଏ ବୁଝିବାରେ ସାହାଯ୍ୟ କରନ୍ତୁ!",
+        "questions": [
+            {
+                "id": "q1",
+                "question": "What time does the clock show?",
+                "question_odia": "ଘଣ୍ଟା କେତେ ସମୟ ଦେଖାଉଛି?",
+                "type": "time_reading",
+                "image_url": "https://images.unsplash.com/photo-1586737640555-2b60ee02b869",
+                "correct_answer": "3:30",
+                "options": ["3:00", "3:30", "4:00", "4:30"]
+            }
+        ],
+        "order": 4
+    },
+    # SOCIAL STUDIES - GRADE 1
+    {
+        "title": "My Odisha Family Tree",
+        "title_odia": "ମୋର ଓଡ଼ିଶା ପରିବାର ବୃକ୍ଷ",
+        "description": "Learn about family relationships and Odia traditions",
+        "description_odia": "ପାରିବାରିକ ସମ୍ପର୍କ ଏବଂ ଓଡ଼ିଆ ପରମ୍ପରା ବିଷୟରେ ଜାଣନ୍ତୁ",
+        "subject": Subject.SOCIAL_STUDIES,
+        "grade": 1,
+        "difficulty": Difficulty.EASY,
+        "xp_reward": 55,
+        "story_context": "Meet little Arjun's family from Bhubaneswar. Learn about different family members and their roles!",
+        "story_context_odia": "ଭୁବନେଶ୍ୱରର ଛୋଟ ଅର୍ଜୁନଙ୍କ ପରିବାରକୁ ଭେଟନ୍ତୁ। ବିଭିନ୍ନ ପରିବାର ସଦସ୍ୟ ଏବଂ ସେମାନଙ୍କର ଭୂମିକା ବିଷୟରେ ଜାଣନ୍ତୁ!",
+        "questions": [
+            {
+                "id": "q1",
+                "question": "Who takes care of children when parents are working?",
+                "question_odia": "ବାବା ମା କାମରେ ଥିବା ସମୟରେ ପିଲାମାନଙ୍କର ଯତ୍ନ କିଏ ନିଅନ୍ତି?",
+                "type": "multiple_choice",
+                "correct_answer": "Grandparents",
+                "options": ["Grandparents", "Neighbors", "Teachers", "Friends"]
+            }
+        ],
+        "order": 5
+    },
+    {
+        "title": "Community Helpers in Our Village",
+        "title_odia": "ଆମ ଗାଁର ସମୁଦାୟ ସାହାଯ୍ୟକାରୀ",
+        "description": "Meet the helpful people who make our community strong",
+        "description_odia": "ଆମ ସମୁଦାୟକୁ ଶକ୍ତିଶାଳୀ କରୁଥିବା ସାହାଯ୍ୟକାରୀ ଲୋକଙ୍କୁ ଭେଟନ୍ତୁ",
+        "subject": Subject.SOCIAL_STUDIES,
+        "grade": 1,
+        "difficulty": Difficulty.EASY,
+        "xp_reward": 50,
+        "story_context": "In every Odisha village, special people help everyone. Let's learn about community helpers!",
+        "story_context_odia": "ପ୍ରତ୍ୟେକ ଓଡ଼ିଶା ଗାଁରେ, ବିଶେଷ ଲୋକମାନେ ସମସ୍ତଙ୍କୁ ସାହାଯ୍ୟ କରନ୍ତି। ଚାଲ ସମୁଦାୟ ସାହାଯ୍ୟକାରୀଙ୍କ ବିଷୟରେ ଜାଣିବା!",
+        "questions": [
+            {
+                "id": "q1",
+                "question": "Who helps when someone is sick?",
+                "question_odia": "କେହି ଅସୁସ୍ଥ ହେଲେ କିଏ ସାହାଯ୍ୟ କରେ?",
+                "type": "multiple_choice",
+                "correct_answer": "Doctor",
+                "options": ["Teacher", "Doctor", "Farmer", "Cook"]
+            }
+        ],
+        "order": 6
+    },
+    # SOCIAL STUDIES - GRADE 2  
+    {
+        "title": "Protect the Village - Learn About Rivers",
+        "title_odia": "ଗାଁକୁ ରକ୍ଷା କର - ନଦୀ ବିଷୟରେ ଜାଣ",
+        "description": "Discover Odisha's sacred rivers and their importance",
+        "description_odia": "ଓଡ଼ିଶାର ପବିତ୍ର ନଦୀ ଏବଂ ସେମାନଙ୍କର ଗୁରୁତ୍ୱ ଆବିଷ୍କାର କରନ୍ତୁ",
+        "subject": Subject.SOCIAL_STUDIES,
+        "grade": 2,
+        "difficulty": Difficulty.MEDIUM,
+        "xp_reward": 80,
+        "story_context": "Learn about Odisha's mighty rivers - Mahanadi, Brahmani, and Baitarani - and how they help our state!",
+        "story_context_odia": "ଓଡ଼ିଶାର ଶକ୍ତିଶାଳୀ ନଦୀ - ମହାନଦୀ, ବ୍ରାହ୍ମଣୀ, ଏବଂ ବୈତରଣୀ - ଏବଂ ସେମାନେ କିପରି ଆମ ରାଜ୍ୟକୁ ସାହାଯ୍ୟ କରନ୍ତି!",
         "questions": [
             {
                 "id": "q1",
@@ -199,7 +319,30 @@ PREDEFINED_QUESTS = [
                 "options": ["Brahmani", "Mahanadi", "Baitarani", "Subarnarekha"]
             }
         ],
-        "order": 2
+        "order": 7
+    },
+    {
+        "title": "Famous People of Odisha",
+        "title_odia": "ଓଡ଼ିଶାର ପ୍ରସିଦ୍ଧ ବ୍ୟକ୍ତିତ୍ୱ",
+        "description": "Learn about heroes and great people from our state",
+        "description_odia": "ଆମ ରାଜ୍ୟର ବୀର ଏବଂ ମହାନ ବ୍ୟକ୍ତିଙ୍କ ବିଷୟରେ ଜାଣନ୍ତୁ",
+        "subject": Subject.SOCIAL_STUDIES,
+        "grade": 2,
+        "difficulty": Difficulty.MEDIUM,
+        "xp_reward": 85,
+        "story_context": "Meet the inspiring people who made Odisha proud - from ancient kings to modern heroes!",
+        "story_context_odia": "ପ୍ରେରଣାଦାୟକ ବ୍ୟକ୍ତିମାନଙ୍କୁ ଭେଟନ୍ତୁ ଯେଉଁମାନେ ଓଡ଼ିଶାକୁ ଗର୍ବିତ କରିଛନ୍ତି - ପ୍ରାଚୀନ ରାଜାଙ୍କଠାରୁ ଆଧୁନିକ ବୀର ପର୍ଯ୍ୟନ୍ତ!",
+        "questions": [
+            {
+                "id": "q1",
+                "question": "Who was the great king that built the Jagannath Temple?",
+                "question_odia": "ଜଗନ୍ନାଥ ମନ୍ଦିର ନିର୍ମାଣ କରୁଥିବା ମହାନ ରାଜା କିଏ ଥିଲେ?",
+                "type": "multiple_choice",
+                "correct_answer": "King Anantavarman",
+                "options": ["King Anantavarman", "King Narasimhadeva", "King Kapilendradeva", "King Purusottamdeva"]
+            }
+        ],
+        "order": 8
     }
 ]
 
