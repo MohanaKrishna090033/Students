@@ -393,6 +393,7 @@ const StudentDashboard = () => {
   const [progress, setProgress] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedQuest, setSelectedQuest] = useState(null);
+  const [showCelebration, setShowCelebration] = useState(false);
   
   useEffect(() => {
     loadData();
@@ -410,6 +411,12 @@ const StudentDashboard = () => {
       setProgress(progressRes.data);
       saveStudent(studentRes.data); // Update student data
       setLoading(false);
+      
+      // Show celebration if student leveled up
+      if (studentRes.data.level > (student.level || 1)) {
+        setShowCelebration(true);
+        setTimeout(() => setShowCelebration(false), 3000);
+      }
     } catch (error) {
       console.error('Error loading data:', error);
       setLoading(false);
@@ -426,7 +433,10 @@ const StudentDashboard = () => {
       math: "Math Adventures",
       social: "Social Studies",
       play: "Play Quest",
-      completed: "Completed"
+      completed: "Completed",
+      badges: "Badges Earned",
+      levelUp: "🎉 Level Up!",
+      newBadge: "New Badge Unlocked!"
     },
     odia: {
       welcome: `ପୁନଃ ସ୍ୱାଗତ, ${student?.name}!`,
@@ -437,7 +447,10 @@ const StudentDashboard = () => {
       math: "ଗଣିତ ଦୁଃସାହସିକ",
       social: "ସାମାଜିକ ଅଧ୍ୟୟନ",
       play: "ଅନ୍ୱେଷଣ ଖେଳ",
-      completed: "ସମ୍ପୂର୍ଣ୍ଣ"
+      completed: "ସମ୍ପୂର୍ଣ୍ଣ",
+      badges: "ଅର୍ଜିତ ବ୍ୟାଜ୍",
+      levelUp: "🎉 ସ୍ତର ବୃଦ୍ଧି!",
+      newBadge: "ନୂଆ ବ୍ୟାଜ୍ ଅନଲକ୍!"
     }
   };
   
@@ -447,10 +460,23 @@ const StudentDashboard = () => {
     return progress.find(p => p.quest_id === questId);
   };
   
+  const getSubjectIcon = (subject) => {
+    return subject === 'math' ? '🧮' : '🏛️';
+  };
+  
+  const getSubjectColor = (subject) => {
+    return subject === 'math' ? 'blue' : 'green';
+  };
+  
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-400 to-pink-600 flex items-center justify-center">
-        <div className="text-white text-2xl font-bold animate-pulse">Loading your quest...</div>
+        <div className="text-white text-2xl font-bold animate-pulse">
+          <div className="flex items-center space-x-2">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+            <span>Loading your quest...</span>
+          </div>
+        </div>
       </div>
     );
   }
@@ -460,93 +486,236 @@ const StudentDashboard = () => {
   }
   
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-400 via-blue-500 to-green-500">
-      {/* Header */}
-      <div className="bg-white bg-opacity-20 backdrop-blur p-6">
-        <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-3xl font-bold text-white">{currentContent.welcome}</h1>
-            <div className="flex gap-4 mt-2 text-yellow-200">
-              <span className="font-bold">{currentContent.level}</span>
-              <span>{currentContent.xp}</span>
-              <span>🔥 {currentContent.streak}</span>
-            </div>
-          </div>
-          <div className="text-6xl">
-            {student?.avatar === 'boy' ? '👦' : student?.avatar === 'girl' ? '👧' : student?.avatar === 'warrior' ? '🛡️' : '📚'}
+    <div className="min-h-screen bg-gradient-to-br from-purple-400 via-blue-500 to-green-500 relative">
+      {/* Celebration Animation */}
+      {showCelebration && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white rounded-2xl p-8 text-center transform animate-bounce">
+            <div className="text-6xl mb-4">🎉</div>
+            <h2 className="text-3xl font-bold text-gray-800 mb-2">{currentContent.levelUp}</h2>
+            <p className="text-lg text-gray-600">You've reached Level {student?.level}!</p>
           </div>
         </div>
-        
-        {/* XP Progress Bar */}
-        <div className="mt-4">
-          <div className="bg-white bg-opacity-30 rounded-full h-3 overflow-hidden">
-            <div 
-              className="bg-yellow-400 h-full transition-all duration-500"
-              style={{ width: `${((student?.total_xp || 0) % 100)}%` }}
-            ></div>
-          </div>
-        </div>
+      )}
+      
+      {/* Floating Game Elements */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-20 left-10 text-4xl animate-bounce">🌟</div>
+        <div className="absolute top-32 right-20 text-3xl animate-pulse">⭐</div>
+        <div className="absolute bottom-40 left-16 text-2xl animate-spin">✨</div>
+        <div className="absolute bottom-20 right-32 text-3xl animate-bounce delay-200">🏆</div>
       </div>
       
-      {/* Village Map / Quest Grid */}
-      <div className="p-6">
-        <h2 className="text-2xl font-bold text-white mb-6 text-center">{currentContent.quests}</h2>
+      {/* Enhanced Header with Game Elements */}
+      <div className="bg-white bg-opacity-20 backdrop-blur p-6 relative overflow-hidden">
+        {/* Animated Background Pattern */}
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute top-0 left-0 w-full h-full bg-repeat-x bg-pattern"></div>
+        </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
-          {quests.map((quest) => {
+        <div className="relative z-10 flex flex-col lg:flex-row justify-between items-center">
+          <div className="mb-4 lg:mb-0">
+            <h1 className="text-3xl font-bold text-white animate-fadeIn">{currentContent.welcome}</h1>
+            <div className="flex flex-wrap gap-4 mt-2 text-yellow-200">
+              <span className="font-bold bg-yellow-400 bg-opacity-20 px-3 py-1 rounded-full animate-pulse">
+                {currentContent.level}
+              </span>
+              <span className="bg-blue-400 bg-opacity-20 px-3 py-1 rounded-full">
+                {currentContent.xp}
+              </span>
+              <span className="bg-orange-400 bg-opacity-20 px-3 py-1 rounded-full">
+                🔥 {currentContent.streak}
+              </span>
+            </div>
+          </div>
+          
+          {/* Animated Avatar */}
+          <div className="relative">
+            <div className="text-8xl animate-bounce hover:animate-spin transition-all duration-500 cursor-pointer">
+              {student?.avatar === 'boy' ? '👦' : student?.avatar === 'girl' ? '👧' : student?.avatar === 'warrior' ? '🛡️' : '📚'}
+            </div>
+            {/* Avatar glow effect */}
+            <div className="absolute inset-0 text-8xl opacity-30 animate-ping">
+              {student?.avatar === 'boy' ? '👦' : student?.avatar === 'girl' ? '👧' : student?.avatar === 'warrior' ? '🛡️' : '📚'}
+            </div>
+          </div>
+        </div>
+        
+        {/* Enhanced XP Progress Bar */}
+        <div className="mt-6 relative">
+          <div className="flex justify-between text-sm text-yellow-200 mb-2">
+            <span>Progress to next level</span>
+            <span>{((student?.total_xp || 0) % 100)}%</span>
+          </div>
+          <div className="bg-white bg-opacity-30 rounded-full h-4 overflow-hidden relative">
+            <div 
+              className="bg-gradient-to-r from-yellow-400 to-orange-500 h-full transition-all duration-1000 ease-out relative"
+              style={{ width: `${((student?.total_xp || 0) % 100)}%` }}
+            >
+              {/* Animated shine effect */}
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-30 animate-pulse"></div>
+            </div>
+          </div>
+        </div>
+        
+        {/* Badges Section */}
+        {student?.badges && student.badges.length > 0 && (
+          <div className="mt-4">
+            <h3 className="text-white font-bold mb-2">{currentContent.badges}</h3>
+            <div className="flex gap-2">
+              {student.badges.map((badge, index) => (
+                <div key={index} 
+                     className="bg-yellow-400 bg-opacity-20 px-3 py-1 rounded-full text-yellow-200 text-sm
+                               animate-bounce hover:scale-110 transform transition-all duration-300"
+                     style={{animationDelay: `${index * 0.2}s`}}>
+                  🏆 {badge}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+      
+      {/* Enhanced Village Map / Quest Grid */}
+      <div className="p-6">
+        <h2 className="text-3xl font-bold text-white mb-6 text-center animate-slideInDown">
+          {currentContent.quests}
+        </h2>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+          {quests.map((quest, index) => {
             const questProgress = getQuestProgress(quest.id);
             const isCompleted = questProgress?.completed;
+            const subjectColor = getSubjectColor(quest.subject);
             
             return (
-              <div key={quest.id} className="bg-white rounded-2xl shadow-xl overflow-hidden transform hover:scale-105 transition-all duration-200">
-                <div className={`h-2 ${quest.subject === 'math' ? 'bg-blue-500' : 'bg-green-500'}`}></div>
+              <div key={quest.id} 
+                   className="bg-white rounded-2xl shadow-xl overflow-hidden transform hover:scale-105 
+                             transition-all duration-300 hover:shadow-2xl relative group animate-slideInUp"
+                   style={{animationDelay: `${index * 0.1}s`}}>
+                
+                {/* Quest Type Header with Animation */}
+                <div className={`h-3 bg-gradient-to-r ${
+                  quest.subject === 'math' 
+                    ? 'from-blue-400 to-blue-600' 
+                    : 'from-green-400 to-green-600'
+                } relative overflow-hidden`}>
+                  <div className="absolute inset-0 bg-white opacity-30 transform -skew-x-12 translate-x-full group-hover:translate-x-0 transition-transform duration-700"></div>
+                </div>
                 
                 <div className="p-6">
                   <div className="flex justify-between items-start mb-4">
-                    <div>
-                      <h3 className="text-xl font-bold text-gray-800">
+                    <div className="flex-1">
+                      <h3 className="text-xl font-bold text-gray-800 mb-2">
                         {language === 'english' ? quest.title : quest.title_odia}
                       </h3>
-                      <p className="text-gray-600 text-sm mt-1">
+                      <p className="text-gray-600 text-sm">
                         {language === 'english' ? quest.description : quest.description_odia}
                       </p>
                     </div>
-                    <div className="text-2xl">
-                      {quest.subject === 'math' ? '🧮' : '🏛️'}
+                    <div className="text-4xl animate-bounce ml-4">
+                      {getSubjectIcon(quest.subject)}
                     </div>
                   </div>
                   
                   <div className="flex justify-between items-center mb-4">
                     <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                      quest.subject === 'math' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'
+                      quest.subject === 'math' 
+                        ? 'bg-blue-100 text-blue-800' 
+                        : 'bg-green-100 text-green-800'
                     }`}>
                       {quest.subject === 'math' ? currentContent.math : currentContent.social}
                     </span>
-                    <span className="text-yellow-600 font-bold">+{quest.xp_reward} XP</span>
+                    <span className="text-yellow-600 font-bold bg-yellow-100 px-3 py-1 rounded-full">
+                      +{quest.xp_reward} XP
+                    </span>
                   </div>
                   
                   {isCompleted && (
-                    <div className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium mb-3 inline-block">
-                      ✅ {currentContent.completed}
+                    <div className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium mb-3 inline-flex items-center animate-pulse">
+                      <span className="animate-bounce mr-1">✅</span>
+                      {currentContent.completed}
                     </div>
                   )}
                   
                   <button
                     onClick={() => setSelectedQuest(quest)}
-                    className={`w-full py-3 px-4 rounded-lg font-bold transition-all duration-200 ${
+                    className={`w-full py-3 px-4 rounded-lg font-bold transition-all duration-300 transform hover:scale-105 ${
                       isCompleted 
                         ? 'bg-gray-200 text-gray-600 hover:bg-gray-300' 
-                        : 'bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:from-purple-600 hover:to-pink-600 transform hover:scale-105'
+                        : `bg-gradient-to-r ${
+                            quest.subject === 'math'
+                              ? 'from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700'
+                              : 'from-green-500 to-green-600 hover:from-green-600 hover:to-green-700'
+                          } text-white shadow-lg hover:shadow-xl`
                     }`}
                   >
-                    {currentContent.play}
+                    <span className="flex items-center justify-center">
+                      <span className="mr-2">{currentContent.play}</span>
+                      <span className="animate-bounce">🎮</span>
+                    </span>
                   </button>
                 </div>
+                
+                {/* Hover Effect Overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-purple-500 to-transparent opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
               </div>
             );
           })}
         </div>
       </div>
+      
+      {/* Enhanced CSS Animations */}
+      <style jsx>{`
+        @keyframes slideInDown {
+          from { 
+            opacity: 0; 
+            transform: translateY(-30px); 
+          }
+          to { 
+            opacity: 1; 
+            transform: translateY(0); 
+          }
+        }
+        
+        @keyframes slideInUp {
+          from { 
+            opacity: 0; 
+            transform: translateY(30px); 
+          }
+          to { 
+            opacity: 1; 
+            transform: translateY(0); 
+          }
+        }
+        
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        
+        .animate-slideInDown {
+          animation: slideInDown 0.8s ease-out;
+        }
+        
+        .animate-slideInUp {
+          animation: slideInUp 0.8s ease-out;
+        }
+        
+        .animate-fadeIn {
+          animation: fadeIn 1s ease-out;
+        }
+        
+        .bg-pattern {
+          background-image: repeating-linear-gradient(
+            45deg,
+            transparent,
+            transparent 10px,
+            rgba(255,255,255,0.1) 10px,
+            rgba(255,255,255,0.1) 20px
+          );
+        }
+      `}</style>
     </div>
   );
 };
