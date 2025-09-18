@@ -164,6 +164,9 @@ backend:
       - working: true
         agent: "testing"
         comment: "✅ VERIFIED: Quest system fully functional. 2 predefined bilingual quests (Math & Social Studies) with complete Odia translations, grade/subject filtering working, culturally relevant Odisha content."
+      - working: true
+        agent: "testing"
+        comment: "✅ EXPANDED CURRICULUM VERIFIED: All 8 new quests loaded successfully with diverse topics - Math: counting mangoes, Konark temple shapes, Jagannath market addition, Odissi dance time; Social Studies: family tree, community helpers, Odisha rivers, famous people. Perfect grade distribution (4 Grade 1 + 4 Grade 2), complete bilingual content with authentic Odia script, proper quest filtering by grade/subject working flawlessly. Enhanced quest system with varied XP rewards (50-85 XP) and culturally relevant Odisha contexts."
 
   - task: "AI-Powered Hints System"
     implemented: true
