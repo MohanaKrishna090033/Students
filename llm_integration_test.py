@@ -7,7 +7,7 @@ import asyncio
 import aiohttp
 import json
 
-BACKEND_URL = "https://bilingual-games.preview.emergentagent.com/api"
+BACKEND_URL = "https://eduquest-village.preview.emergentagent.com/api"
 
 async def test_llm_integration():
     """Test the multi-LLM integration with different providers"""

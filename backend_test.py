@@ -13,7 +13,7 @@ from datetime import datetime
 from typing import Dict, Any, List
 
 # Backend URL from frontend/.env
-BACKEND_URL = "https://bilingual-games.preview.emergentagent.com/api"
+BACKEND_URL = "https://eduquest-village.preview.emergentagent.com/api"
 
 class EduQuestTester:
     def __init__(self):
