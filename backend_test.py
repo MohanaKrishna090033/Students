@@ -123,64 +123,211 @@ class EduQuestTester:
             self.log_test("Student Profile Retrieval", False, f"Exception: {str(e)}")
             return False
     
-    async def test_quest_retrieval(self):
-        """Test quest retrieval with filters"""
+    async def test_expanded_curriculum_quests(self):
+        """Test the expanded curriculum with 8 new quests covering diverse subjects"""
         try:
-            # Test all quests
+            # Test all quests - should have 8 quests total
             async with self.session.get(f"{BACKEND_URL}/quests") as response:
                 if response.status == 200:
                     quests = await response.json()
-                    if len(quests) >= 2:  # Should have at least the predefined quests
-                        math_quest = next((q for q in quests if q["subject"] == "math"), None)
-                        social_quest = next((q for q in quests if q["subject"] == "social_studies"), None)
-                        
-                        if math_quest and social_quest:
-                            # Check bilingual content
-                            if "title_odia" in math_quest and "description_odia" in math_quest:
-                                self.log_test("Quest Retrieval - All Quests", True, f"Found {len(quests)} quests with bilingual content")
-                            else:
-                                self.log_test("Quest Retrieval - All Quests", False, "Missing bilingual content")
-                                return False
-                        else:
-                            self.log_test("Quest Retrieval - All Quests", False, "Missing expected quest subjects")
-                            return False
-                    else:
-                        self.log_test("Quest Retrieval - All Quests", False, f"Expected at least 2 quests, got {len(quests)}")
+                    if len(quests) != 8:
+                        self.log_test("Expanded Curriculum - Quest Count", False, f"Expected 8 quests, got {len(quests)}")
                         return False
+                    
+                    # Verify quest subjects and grades distribution
+                    math_quests = [q for q in quests if q["subject"] == "math"]
+                    social_quests = [q for q in quests if q["subject"] == "social_studies"]
+                    grade1_quests = [q for q in quests if q["grade"] == 1]
+                    grade2_quests = [q for q in quests if q["grade"] == 2]
+                    
+                    if len(math_quests) != 4 or len(social_quests) != 4:
+                        self.log_test("Expanded Curriculum - Subject Distribution", False, 
+                                    f"Expected 4 Math + 4 Social Studies, got {len(math_quests)} Math + {len(social_quests)} Social")
+                        return False
+                    
+                    if len(grade1_quests) != 4 or len(grade2_quests) != 4:
+                        self.log_test("Expanded Curriculum - Grade Distribution", False,
+                                    f"Expected 4 Grade 1 + 4 Grade 2, got {len(grade1_quests)} Grade 1 + {len(grade2_quests)} Grade 2")
+                        return False
+                    
+                    # Verify specific quest topics as mentioned in review request
+                    expected_topics = {
+                        "math": ["counting", "shapes", "addition", "time"],
+                        "social_studies": ["family", "community helpers", "rivers", "famous people"]
+                    }
+                    
+                    # Check Math topics
+                    math_titles = [q["title"].lower() for q in math_quests]
+                    math_topics_found = []
+                    if any("count" in title or "mango" in title for title in math_titles):
+                        math_topics_found.append("counting")
+                    if any("shape" in title or "konark" in title for title in math_titles):
+                        math_topics_found.append("shapes")
+                    if any("addition" in title or "market" in title for title in math_titles):
+                        math_topics_found.append("addition")
+                    if any("time" in title or "dance" in title for title in math_titles):
+                        math_topics_found.append("time")
+                    
+                    # Check Social Studies topics
+                    social_titles = [q["title"].lower() for q in social_quests]
+                    social_topics_found = []
+                    if any("family" in title for title in social_titles):
+                        social_topics_found.append("family")
+                    if any("community" in title or "helper" in title for title in social_titles):
+                        social_topics_found.append("community helpers")
+                    if any("river" in title for title in social_titles):
+                        social_topics_found.append("rivers")
+                    if any("famous" in title or "people" in title for title in social_titles):
+                        social_topics_found.append("famous people")
+                    
+                    if len(math_topics_found) != 4:
+                        self.log_test("Expanded Curriculum - Math Topics", False,
+                                    f"Expected all 4 math topics (counting, shapes, addition, time), found: {math_topics_found}")
+                        return False
+                    
+                    if len(social_topics_found) != 4:
+                        self.log_test("Expanded Curriculum - Social Studies Topics", False,
+                                    f"Expected all 4 social studies topics (family, community helpers, rivers, famous people), found: {social_topics_found}")
+                        return False
+                    
+                    self.log_test("Expanded Curriculum - All 8 Quests", True, 
+                                f"✅ All 8 quests loaded with correct subject/grade distribution and diverse topics")
+                    
                 else:
                     error_text = await response.text()
-                    self.log_test("Quest Retrieval - All Quests", False, f"HTTP {response.status}: {error_text}")
+                    self.log_test("Expanded Curriculum - Quest Retrieval", False, f"HTTP {response.status}: {error_text}")
                     return False
             
-            # Test filtered by grade
-            async with self.session.get(f"{BACKEND_URL}/quests?grade=1") as response:
+            return True
+                    
+        except Exception as e:
+            self.log_test("Expanded Curriculum", False, f"Exception: {str(e)}")
+            return False
+
+    async def test_bilingual_content_structure(self):
+        """Test bilingual content (English/Odia) structure and quality"""
+        try:
+            async with self.session.get(f"{BACKEND_URL}/quests") as response:
                 if response.status == 200:
-                    grade_quests = await response.json()
-                    if all(q["grade"] == 1 for q in grade_quests):
-                        self.log_test("Quest Retrieval - Grade Filter", True, f"Grade 1 filter working, {len(grade_quests)} quests")
+                    quests = await response.json()
+                    
+                    for quest in quests:
+                        # Check required bilingual fields
+                        required_bilingual_fields = [
+                            ("title", "title_odia"),
+                            ("description", "description_odia"),
+                            ("story_context", "story_context_odia")
+                        ]
+                        
+                        for eng_field, odia_field in required_bilingual_fields:
+                            if eng_field not in quest or odia_field not in quest:
+                                self.log_test("Bilingual Content - Field Structure", False,
+                                            f"Quest '{quest.get('title', 'Unknown')}' missing {eng_field} or {odia_field}")
+                                return False
+                            
+                            if not quest[eng_field] or not quest[odia_field]:
+                                self.log_test("Bilingual Content - Content Quality", False,
+                                            f"Quest '{quest['title']}' has empty {eng_field} or {odia_field}")
+                                return False
+                        
+                        # Check questions have bilingual content
+                        for question in quest.get("questions", []):
+                            if "question" not in question or "question_odia" not in question:
+                                self.log_test("Bilingual Content - Question Structure", False,
+                                            f"Question in quest '{quest['title']}' missing bilingual content")
+                                return False
+                            
+                            if not question["question"] or not question["question_odia"]:
+                                self.log_test("Bilingual Content - Question Quality", False,
+                                            f"Question in quest '{quest['title']}' has empty bilingual content")
+                                return False
+                    
+                    # Verify Odia content contains Odia script characters
+                    sample_quest = quests[0]
+                    odia_text = sample_quest["title_odia"]
+                    
+                    # Check for Odia Unicode characters (basic check)
+                    has_odia_chars = any(ord(char) >= 0x0B00 and ord(char) <= 0x0B7F for char in odia_text)
+                    
+                    if has_odia_chars:
+                        self.log_test("Bilingual Content - Odia Script", True,
+                                    "✅ Odia content contains proper Odia script characters")
                     else:
-                        self.log_test("Quest Retrieval - Grade Filter", False, "Grade filter not working properly")
+                        self.log_test("Bilingual Content - Odia Script", False,
+                                    "Odia content does not contain Odia script characters")
                         return False
+                    
+                    self.log_test("Bilingual Content Structure", True,
+                                f"✅ All {len(quests)} quests have complete bilingual content structure")
+                    return True
+                    
                 else:
-                    self.log_test("Quest Retrieval - Grade Filter", False, f"HTTP {response.status}")
-                    return False
-            
-            # Test filtered by subject
-            async with self.session.get(f"{BACKEND_URL}/quests?subject=math") as response:
-                if response.status == 200:
-                    math_quests = await response.json()
-                    if all(q["subject"] == "math" for q in math_quests):
-                        self.log_test("Quest Retrieval - Subject Filter", True, f"Math filter working, {len(math_quests)} quests")
-                        return True
-                    else:
-                        self.log_test("Quest Retrieval - Subject Filter", False, "Subject filter not working properly")
-                        return False
-                else:
-                    self.log_test("Quest Retrieval - Subject Filter", False, f"HTTP {response.status}")
+                    error_text = await response.text()
+                    self.log_test("Bilingual Content", False, f"HTTP {response.status}: {error_text}")
                     return False
                     
         except Exception as e:
-            self.log_test("Quest Retrieval", False, f"Exception: {str(e)}")
+            self.log_test("Bilingual Content", False, f"Exception: {str(e)}")
+            return False
+
+    async def test_quest_filtering_by_grade(self):
+        """Test quest filtering by grade (Grade 1 vs Grade 2)"""
+        try:
+            # Test Grade 1 filtering
+            async with self.session.get(f"{BACKEND_URL}/quests?grade=1") as response:
+                if response.status == 200:
+                    grade1_quests = await response.json()
+                    if not all(q["grade"] == 1 for q in grade1_quests):
+                        self.log_test("Quest Filtering - Grade 1", False, "Grade 1 filter returned non-Grade 1 quests")
+                        return False
+                    
+                    if len(grade1_quests) != 4:
+                        self.log_test("Quest Filtering - Grade 1 Count", False, f"Expected 4 Grade 1 quests, got {len(grade1_quests)}")
+                        return False
+                    
+                    self.log_test("Quest Filtering - Grade 1", True, f"✅ Grade 1 filter working correctly ({len(grade1_quests)} quests)")
+                else:
+                    self.log_test("Quest Filtering - Grade 1", False, f"HTTP {response.status}")
+                    return False
+            
+            # Test Grade 2 filtering
+            async with self.session.get(f"{BACKEND_URL}/quests?grade=2") as response:
+                if response.status == 200:
+                    grade2_quests = await response.json()
+                    if not all(q["grade"] == 2 for q in grade2_quests):
+                        self.log_test("Quest Filtering - Grade 2", False, "Grade 2 filter returned non-Grade 2 quests")
+                        return False
+                    
+                    if len(grade2_quests) != 4:
+                        self.log_test("Quest Filtering - Grade 2 Count", False, f"Expected 4 Grade 2 quests, got {len(grade2_quests)}")
+                        return False
+                    
+                    self.log_test("Quest Filtering - Grade 2", True, f"✅ Grade 2 filter working correctly ({len(grade2_quests)} quests)")
+                else:
+                    self.log_test("Quest Filtering - Grade 2", False, f"HTTP {response.status}")
+                    return False
+            
+            # Test subject filtering
+            async with self.session.get(f"{BACKEND_URL}/quests?subject=math") as response:
+                if response.status == 200:
+                    math_quests = await response.json()
+                    if not all(q["subject"] == "math" for q in math_quests):
+                        self.log_test("Quest Filtering - Math Subject", False, "Math filter returned non-Math quests")
+                        return False
+                    
+                    if len(math_quests) != 4:
+                        self.log_test("Quest Filtering - Math Count", False, f"Expected 4 Math quests, got {len(math_quests)}")
+                        return False
+                    
+                    self.log_test("Quest Filtering - Math Subject", True, f"✅ Math subject filter working correctly ({len(math_quests)} quests)")
+                else:
+                    self.log_test("Quest Filtering - Math Subject", False, f"HTTP {response.status}")
+                    return False
+            
+            return True
+                    
+        except Exception as e:
+            self.log_test("Quest Filtering", False, f"Exception: {str(e)}")
             return False
     
     async def test_quest_submission_and_scoring(self):
