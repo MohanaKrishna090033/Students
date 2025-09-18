@@ -740,10 +740,12 @@ class EduQuestTester:
             return False
     
     async def run_all_tests(self):
-        """Run all backend tests"""
-        print("🚀 Starting EduQuest Odisha Backend API Tests")
+        """Run all backend tests for expanded EduQuest Odisha curriculum"""
+        print("🚀 Starting EduQuest Odisha Backend API Tests - Expanded Curriculum")
         print(f"🌐 Testing against: {BACKEND_URL}")
-        print("=" * 60)
+        print("📚 Testing 8 new quests with diverse Math & Social Studies content")
+        print("🌍 Verifying bilingual (English/Odia) content structure")
+        print("=" * 70)
         
         await self.setup()
         
@@ -752,19 +754,25 @@ class EduQuestTester:
             await self.test_root_endpoint()
             await self.test_student_registration()
             await self.test_student_profile_retrieval()
-            await self.test_quest_retrieval()
+            
+            # Expanded curriculum specific tests
+            await self.test_expanded_curriculum_quests()
+            await self.test_quest_filtering_by_grade()
+            await self.test_bilingual_content_structure()
+            
+            # Enhanced functionality tests
             await self.test_quest_submission_and_scoring()
             await self.test_progress_tracking()
             await self.test_gamification_system()
             await self.test_ai_hint_generation()
-            await self.test_complete_student_journey()
+            await self.test_enhanced_student_flow()
             
         finally:
             await self.cleanup()
         
         # Print summary
-        print("=" * 60)
-        print("📊 TEST SUMMARY")
+        print("=" * 70)
+        print("📊 EXPANDED CURRICULUM TEST SUMMARY")
         print(f"✅ Passed: {self.test_results['passed']}")
         print(f"❌ Failed: {self.test_results['failed']}")
         
@@ -775,6 +783,14 @@ class EduQuestTester:
         
         success_rate = (self.test_results['passed'] / (self.test_results['passed'] + self.test_results['failed'])) * 100
         print(f"\n📈 Success Rate: {success_rate:.1f}%")
+        
+        if success_rate == 100:
+            print("\n🎉 EXPANDED CURRICULUM VERIFICATION COMPLETE!")
+            print("✅ All 8 quests loaded with diverse Math & Social Studies topics")
+            print("✅ Bilingual content (English/Odia) properly structured")
+            print("✅ Grade filtering (Grade 1 vs Grade 2) working correctly")
+            print("✅ Enhanced gamification and student flow functional")
+            print("✅ MongoDB data persistence verified")
         
         return self.test_results['failed'] == 0
 
