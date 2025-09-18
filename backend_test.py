@@ -584,79 +584,159 @@ class EduQuestTester:
             self.log_test("AI Hint Generation", False, f"Exception: {str(e)}")
             return False
     
-    async def test_complete_student_journey(self):
-        """Test complete student journey from registration to quest completion"""
+    async def test_enhanced_student_flow(self):
+        """Test complete enhanced student flow with expanded curriculum"""
         try:
-            # Create a new student for journey testing
-            journey_student = {
-                "name": "Ravi Kumar",
+            # Create a Grade 2 student for comprehensive testing
+            enhanced_student = {
+                "name": "Priya Mohanty",
                 "age": 8,
                 "grade": 2,
-                "avatar": "warrior",
+                "avatar": "girl",
                 "language": "odia"
             }
             
             async with self.session.post(
                 f"{BACKEND_URL}/students",
-                json=journey_student,
+                json=enhanced_student,
                 headers={"Content-Type": "application/json"}
             ) as response:
                 if response.status != 200:
-                    self.log_test("Complete Journey - Student Creation", False, f"HTTP {response.status}")
+                    self.log_test("Enhanced Student Flow - Creation", False, f"HTTP {response.status}")
                     return False
                 
                 student_data = await response.json()
-                journey_student_id = student_data["id"]
-            
-            # Get available quests
-            async with self.session.get(f"{BACKEND_URL}/quests") as response:
-                quests = await response.json()
-                if not quests:
-                    self.log_test("Complete Journey - Quest Retrieval", False, "No quests available")
-                    return False
-            
-            # Complete a math quest
-            math_quest = next((q for q in quests if q["subject"] == "math"), None)
-            if not math_quest:
-                self.log_test("Complete Journey - Math Quest", False, "No math quest found")
-                return False
-            
-            submission = {
-                "quest_id": math_quest["id"],
-                "answers": [{"question_id": "q1", "answer": "5"}]
-            }
-            
-            async with self.session.post(
-                f"{BACKEND_URL}/students/{journey_student_id}/submit_quest",
-                json=submission,
-                headers={"Content-Type": "application/json"}
-            ) as response:
-                if response.status != 200:
-                    self.log_test("Complete Journey - Quest Submission", False, f"HTTP {response.status}")
+                enhanced_student_id = student_data["id"]
+                
+                # Verify initial student state
+                if student_data["total_xp"] != 0 or student_data["level"] != 1:
+                    self.log_test("Enhanced Student Flow - Initial State", False, "Student not initialized correctly")
                     return False
                 
-                result = await response.json()
-                if not result["completed"]:
-                    self.log_test("Complete Journey - Quest Completion", False, "Quest not marked as completed")
-                    return False
+                self.log_test("Enhanced Student Flow - Creation", True, f"Student created: {student_data['name']}")
             
-            # Check updated student profile
-            async with self.session.get(f"{BACKEND_URL}/students/{journey_student_id}") as response:
+            # Get Grade 2 quests specifically
+            async with self.session.get(f"{BACKEND_URL}/quests?grade=2") as response:
                 if response.status != 200:
-                    self.log_test("Complete Journey - Profile Update", False, f"HTTP {response.status}")
+                    self.log_test("Enhanced Student Flow - Quest Retrieval", False, f"HTTP {response.status}")
+                    return False
+                
+                grade2_quests = await response.json()
+                if len(grade2_quests) != 4:
+                    self.log_test("Enhanced Student Flow - Grade 2 Quests", False, f"Expected 4 Grade 2 quests, got {len(grade2_quests)}")
+                    return False
+                
+                self.log_test("Enhanced Student Flow - Quest Retrieval", True, f"Retrieved {len(grade2_quests)} Grade 2 quests")
+            
+            # Complete multiple quests to test enhanced gamification
+            completed_quests = 0
+            total_xp_earned = 0
+            
+            # Complete Math quest (Addition)
+            math_quest = next((q for q in grade2_quests if "addition" in q["title"].lower() or "market" in q["title"].lower()), None)
+            if math_quest:
+                submission = {
+                    "quest_id": math_quest["id"],
+                    "answers": [{"question_id": "q1", "answer": "80"}]  # 45 + 35 = 80
+                }
+                
+                async with self.session.post(
+                    f"{BACKEND_URL}/students/{enhanced_student_id}/submit_quest",
+                    json=submission,
+                    headers={"Content-Type": "application/json"}
+                ) as response:
+                    if response.status == 200:
+                        result = await response.json()
+                        if result["completed"]:
+                            completed_quests += 1
+                            total_xp_earned += result["xp_earned"]
+                            self.log_test("Enhanced Student Flow - Math Quest", True, f"Math quest completed, XP earned: {result['xp_earned']}")
+                        else:
+                            self.log_test("Enhanced Student Flow - Math Quest", False, "Math quest not completed")
+                            return False
+                    else:
+                        self.log_test("Enhanced Student Flow - Math Quest", False, f"HTTP {response.status}")
+                        return False
+            
+            # Complete Social Studies quest (Rivers)
+            social_quest = next((q for q in grade2_quests if "river" in q["title"].lower()), None)
+            if social_quest:
+                submission = {
+                    "quest_id": social_quest["id"],
+                    "answers": [{"question_id": "q1", "answer": "Mahanadi"}]
+                }
+                
+                async with self.session.post(
+                    f"{BACKEND_URL}/students/{enhanced_student_id}/submit_quest",
+                    json=submission,
+                    headers={"Content-Type": "application/json"}
+                ) as response:
+                    if response.status == 200:
+                        result = await response.json()
+                        if result["completed"]:
+                            completed_quests += 1
+                            total_xp_earned += result["xp_earned"]
+                            
+                            # Check for badge awards
+                            if result.get("new_badges"):
+                                self.log_test("Enhanced Student Flow - Badge System", True, f"Badges awarded: {result['new_badges']}")
+                            
+                            self.log_test("Enhanced Student Flow - Social Studies Quest", True, f"Social Studies quest completed, XP earned: {result['xp_earned']}")
+                        else:
+                            self.log_test("Enhanced Student Flow - Social Studies Quest", False, "Social Studies quest not completed")
+                            return False
+                    else:
+                        self.log_test("Enhanced Student Flow - Social Studies Quest", False, f"HTTP {response.status}")
+                        return False
+            
+            # Verify updated student profile with enhanced gamification
+            async with self.session.get(f"{BACKEND_URL}/students/{enhanced_student_id}") as response:
+                if response.status != 200:
+                    self.log_test("Enhanced Student Flow - Profile Update", False, f"HTTP {response.status}")
                     return False
                 
                 updated_student = await response.json()
-                if updated_student["total_xp"] > 0 and updated_student["level"] >= 1:
-                    self.log_test("Complete Journey", True, 
-                                f"Student journey completed: XP={updated_student['total_xp']}, Level={updated_student['level']}")
-                    return True
-                else:
-                    self.log_test("Complete Journey", False, "Student stats not updated properly")
+                
+                # Verify XP and level progression
+                if updated_student["total_xp"] != total_xp_earned:
+                    self.log_test("Enhanced Student Flow - XP Calculation", False, 
+                                f"XP mismatch: expected {total_xp_earned}, got {updated_student['total_xp']}")
                     return False
+                
+                expected_level = (total_xp_earned // 100) + 1
+                if updated_student["level"] != expected_level:
+                    self.log_test("Enhanced Student Flow - Level Calculation", False,
+                                f"Level mismatch: expected {expected_level}, got {updated_student['level']}")
+                    return False
+                
+                # Verify badge system
+                if len(updated_student["badges"]) > 0:
+                    self.log_test("Enhanced Student Flow - Badge Awards", True, f"Student earned {len(updated_student['badges'])} badges")
+                
+                self.log_test("Enhanced Student Flow - Gamification", True, 
+                            f"Student progression: XP={updated_student['total_xp']}, Level={updated_student['level']}, Badges={len(updated_student['badges'])}")
+            
+            # Test progress tracking
+            async with self.session.get(f"{BACKEND_URL}/students/{enhanced_student_id}/progress") as response:
+                if response.status == 200:
+                    progress_records = await response.json()
+                    if len(progress_records) == completed_quests:
+                        self.log_test("Enhanced Student Flow - Progress Tracking", True, 
+                                    f"Progress tracking working: {len(progress_records)} records for {completed_quests} completed quests")
+                    else:
+                        self.log_test("Enhanced Student Flow - Progress Tracking", False,
+                                    f"Progress record mismatch: {len(progress_records)} records for {completed_quests} quests")
+                        return False
+                else:
+                    self.log_test("Enhanced Student Flow - Progress Tracking", False, f"HTTP {response.status}")
+                    return False
+            
+            self.log_test("Enhanced Student Flow", True, 
+                        f"✅ Complete enhanced student flow successful: {completed_quests} quests completed, {total_xp_earned} XP earned")
+            return True
                     
         except Exception as e:
-            self.log_test("Complete Journey", False, f"Exception: {str(e)}")
+            self.log_test("Enhanced Student Flow", False, f"Exception: {str(e)}")
             return False
     
     async def run_all_tests(self):
