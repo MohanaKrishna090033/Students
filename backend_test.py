@@ -331,87 +331,119 @@ class EduQuestTester:
             return False
     
     async def test_quest_submission_and_scoring(self):
-        """Test quest submission, scoring, and XP calculation"""
+        """Test quest submission, scoring, and XP calculation with expanded curriculum"""
         if not self.test_student_id:
             self.log_test("Quest Submission", False, "No test student ID available")
             return False
         
         try:
-            # First get a quest to submit
-            async with self.session.get(f"{BACKEND_URL}/quests?subject=math") as response:
+            # Get all quests to test different types
+            async with self.session.get(f"{BACKEND_URL}/quests") as response:
                 quests = await response.json()
                 if not quests:
-                    self.log_test("Quest Submission", False, "No math quests available")
+                    self.log_test("Quest Submission", False, "No quests available")
                     return False
                 
-                math_quest = quests[0]
-                quest_id = math_quest["id"]
-                
-                # Submit correct answer
-                submission_data = {
-                    "quest_id": quest_id,
-                    "answers": [
-                        {
-                            "question_id": "q1",
-                            "answer": "5"  # Correct answer for mango counting
-                        }
-                    ]
-                }
-                
-                async with self.session.post(
-                    f"{BACKEND_URL}/students/{self.test_student_id}/submit_quest",
-                    json=submission_data,
-                    headers={"Content-Type": "application/json"}
-                ) as response:
-                    if response.status == 200:
-                        result = await response.json()
-                        expected_fields = ["score", "xp_earned", "completed", "correct_answers", "total_questions"]
-                        
-                        if all(field in result for field in expected_fields):
-                            if result["score"] == 100 and result["completed"] and result["xp_earned"] > 0:
-                                self.log_test("Quest Submission - Correct Answer", True, 
-                                            f"Score: {result['score']}, XP: {result['xp_earned']}, Completed: {result['completed']}")
+                # Test Math quest (mango counting)
+                math_quest = next((q for q in quests if "mango" in q["title"].lower()), None)
+                if math_quest:
+                    submission_data = {
+                        "quest_id": math_quest["id"],
+                        "answers": [
+                            {
+                                "question_id": "q1",
+                                "answer": "15"  # Correct answer for mango counting
+                            }
+                        ]
+                    }
+                    
+                    async with self.session.post(
+                        f"{BACKEND_URL}/students/{self.test_student_id}/submit_quest",
+                        json=submission_data,
+                        headers={"Content-Type": "application/json"}
+                    ) as response:
+                        if response.status == 200:
+                            result = await response.json()
+                            expected_fields = ["score", "xp_earned", "completed", "correct_answers", "total_questions"]
+                            
+                            if all(field in result for field in expected_fields):
+                                if result["score"] == 100 and result["completed"] and result["xp_earned"] > 0:
+                                    self.log_test("Quest Submission - Math Quest", True, 
+                                                f"Math quest completed: Score: {result['score']}, XP: {result['xp_earned']}")
+                                else:
+                                    self.log_test("Quest Submission - Math Quest", False, 
+                                                f"Unexpected scoring: {result}")
+                                    return False
                             else:
-                                self.log_test("Quest Submission - Correct Answer", False, 
+                                self.log_test("Quest Submission - Math Quest", False, "Missing response fields")
+                                return False
+                        else:
+                            error_text = await response.text()
+                            self.log_test("Quest Submission - Math Quest", False, f"HTTP {response.status}: {error_text}")
+                            return False
+                
+                # Test Social Studies quest (rivers)
+                social_quest = next((q for q in quests if "river" in q["title"].lower()), None)
+                if social_quest:
+                    submission_data = {
+                        "quest_id": social_quest["id"],
+                        "answers": [
+                            {
+                                "question_id": "q1",
+                                "answer": "Mahanadi"  # Correct answer for longest river in Odisha
+                            }
+                        ]
+                    }
+                    
+                    async with self.session.post(
+                        f"{BACKEND_URL}/students/{self.test_student_id}/submit_quest",
+                        json=submission_data,
+                        headers={"Content-Type": "application/json"}
+                    ) as response:
+                        if response.status == 200:
+                            result = await response.json()
+                            if result["score"] == 100 and result["completed"] and result["xp_earned"] > 0:
+                                self.log_test("Quest Submission - Social Studies Quest", True, 
+                                            f"Social Studies quest completed: Score: {result['score']}, XP: {result['xp_earned']}")
+                            else:
+                                self.log_test("Quest Submission - Social Studies Quest", False, 
                                             f"Unexpected scoring: {result}")
                                 return False
                         else:
-                            self.log_test("Quest Submission - Correct Answer", False, "Missing response fields")
+                            error_text = await response.text()
+                            self.log_test("Quest Submission - Social Studies Quest", False, f"HTTP {response.status}: {error_text}")
                             return False
-                    else:
-                        error_text = await response.text()
-                        self.log_test("Quest Submission - Correct Answer", False, f"HTTP {response.status}: {error_text}")
-                        return False
                 
-                # Test incorrect answer
-                wrong_submission = {
-                    "quest_id": quest_id,
-                    "answers": [
-                        {
-                            "question_id": "q1",
-                            "answer": "3"  # Wrong answer
-                        }
-                    ]
-                }
-                
-                async with self.session.post(
-                    f"{BACKEND_URL}/students/{self.test_student_id}/submit_quest",
-                    json=wrong_submission,
-                    headers={"Content-Type": "application/json"}
-                ) as response:
-                    if response.status == 200:
-                        result = await response.json()
-                        if result["score"] == 0 and not result["completed"]:
-                            self.log_test("Quest Submission - Wrong Answer", True, 
-                                        f"Correctly handled wrong answer: Score {result['score']}")
-                            return True
+                # Test wrong answer handling
+                if math_quest:
+                    wrong_submission = {
+                        "quest_id": math_quest["id"],
+                        "answers": [
+                            {
+                                "question_id": "q1",
+                                "answer": "10"  # Wrong answer
+                            }
+                        ]
+                    }
+                    
+                    async with self.session.post(
+                        f"{BACKEND_URL}/students/{self.test_student_id}/submit_quest",
+                        json=wrong_submission,
+                        headers={"Content-Type": "application/json"}
+                    ) as response:
+                        if response.status == 200:
+                            result = await response.json()
+                            if result["score"] == 0 and not result["completed"]:
+                                self.log_test("Quest Submission - Wrong Answer", True, 
+                                            f"Correctly handled wrong answer: Score {result['score']}")
+                                return True
+                            else:
+                                self.log_test("Quest Submission - Wrong Answer", False, 
+                                            f"Wrong answer scoring issue: {result}")
+                                return False
                         else:
-                            self.log_test("Quest Submission - Wrong Answer", False, 
-                                        f"Wrong answer scoring issue: {result}")
+                            self.log_test("Quest Submission - Wrong Answer", False, f"HTTP {response.status}")
                             return False
-                    else:
-                        self.log_test("Quest Submission - Wrong Answer", False, f"HTTP {response.status}")
-                        return False
                         
         except Exception as e:
             self.log_test("Quest Submission", False, f"Exception: {str(e)}")
