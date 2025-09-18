@@ -122,37 +122,55 @@ const HomePage = ({ onStartLearning }) => {
   
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-400 via-purple-500 to-pink-500 relative overflow-hidden">
-      {/* Animated Background Elements */}
+      {/* Enhanced Animated Background Elements */}
       <div className="absolute inset-0">
         <div className="absolute top-20 left-10 w-20 h-20 bg-yellow-300 rounded-full opacity-70 animate-bounce"></div>
         <div className="absolute top-40 right-20 w-16 h-16 bg-green-300 rounded-full opacity-60 animate-pulse"></div>
         <div className="absolute bottom-20 left-1/4 w-12 h-12 bg-red-300 rounded-full opacity-50 animate-bounce delay-100"></div>
         <div className="absolute bottom-40 right-1/3 w-14 h-14 bg-blue-300 rounded-full opacity-60 animate-pulse delay-200"></div>
+        
+        {/* Floating Stars Animation */}
+        <div className="absolute top-32 left-1/2 w-8 h-8 text-yellow-200 animate-spin">⭐</div>
+        <div className="absolute top-60 right-1/4 w-6 h-6 text-white animate-bounce delay-300">✨</div>
+        <div className="absolute bottom-32 left-1/3 w-10 h-10 text-yellow-300 animate-pulse delay-500">🌟</div>
+        
+        {/* Animated Clouds */}
+        <div className="absolute top-16 left-0 w-24 h-12 bg-white bg-opacity-30 rounded-full animate-pulse"></div>
+        <div className="absolute top-24 right-0 w-20 h-10 bg-white bg-opacity-20 rounded-full animate-pulse delay-200"></div>
       </div>
       
       <div className="relative z-10 flex flex-col items-center justify-center min-h-screen text-center px-6">
-        {/* Hero Section */}
-        <div className="mb-8">
-          <img 
-            src="https://images.unsplash.com/photo-1650521552329-4a669b69b7b8" 
-            alt="Warrior Mascot"
-            className="w-32 h-32 mx-auto mb-6 rounded-full shadow-lg animate-bounce"
-          />
-          <h1 className="text-6xl font-bold text-white mb-4 drop-shadow-lg">
+        {/* Enhanced Hero Section with Animation */}
+        <div className="mb-8 transform hover:scale-105 transition-all duration-300">
+          <div className="relative">
+            <img 
+              src="https://images.unsplash.com/photo-1650521552329-4a669b69b7b8" 
+              alt="Warrior Mascot"
+              className="w-32 h-32 mx-auto mb-6 rounded-full shadow-2xl animate-bounce hover:animate-spin transition-all duration-500"
+            />
+            {/* Magical glow effect */}
+            <div className="absolute inset-0 w-32 h-32 mx-auto mb-6 rounded-full bg-yellow-300 opacity-20 animate-ping"></div>
+          </div>
+          
+          <h1 className="text-6xl font-bold text-white mb-4 drop-shadow-lg animate-pulse">
             {currentContent.title}
           </h1>
-          <p className="text-2xl text-yellow-200 mb-6 font-semibold">
+          <p className="text-2xl text-yellow-200 mb-6 font-semibold animate-fadeIn">
             {currentContent.subtitle}
           </p>
-          <p className="text-lg text-white mb-8 max-w-2xl mx-auto">
+          <p className="text-lg text-white mb-8 max-w-2xl mx-auto animate-slideInUp">
             {currentContent.mission}
           </p>
         </div>
         
-        {/* Features Grid */}
+        {/* Enhanced Features Grid with Hover Effects */}
         <div className="grid grid-cols-2 gap-4 mb-8 max-w-2xl">
           {currentContent.features.map((feature, index) => (
-            <div key={index} className="bg-white bg-opacity-20 backdrop-blur rounded-lg p-4 text-white font-medium">
+            <div key={index} 
+                 className="bg-white bg-opacity-20 backdrop-blur rounded-lg p-4 text-white font-medium 
+                           transform hover:scale-110 hover:bg-opacity-30 transition-all duration-300 
+                           hover:shadow-xl cursor-pointer animate-slideInLeft"
+                 style={{animationDelay: `${index * 0.2}s`}}>
               {feature}
             </div>
           ))}
@@ -167,14 +185,60 @@ const HomePage = ({ onStartLearning }) => {
           />
         </div>
         
-        {/* Start Button */}
+        {/* Enhanced Start Button with Glow Effect */}
         <button
           onClick={onStartLearning}
-          className="relative z-20 bg-green-500 hover:bg-green-600 text-white text-2xl font-bold py-4 px-8 rounded-full shadow-xl transform hover:scale-105 transition-all duration-200 animate-pulse"
+          className="relative z-20 bg-green-500 hover:bg-green-600 text-white text-2xl font-bold py-4 px-8 rounded-full 
+                     shadow-xl transform hover:scale-110 transition-all duration-300 animate-pulse hover:animate-none
+                     hover:shadow-2xl hover:shadow-green-300/50"
         >
-          {currentContent.startButton}
+          <span className="relative z-10">{currentContent.startButton}</span>
+          {/* Button glow effect */}
+          <div className="absolute inset-0 bg-green-400 rounded-full opacity-50 animate-ping"></div>
         </button>
       </div>
+      
+      {/* CSS Animation Styles */}
+      <style jsx>{`
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        
+        @keyframes slideInUp {
+          from { 
+            opacity: 0; 
+            transform: translateY(30px); 
+          }
+          to { 
+            opacity: 1; 
+            transform: translateY(0); 
+          }
+        }
+        
+        @keyframes slideInLeft {
+          from { 
+            opacity: 0; 
+            transform: translateX(-30px); 
+          }
+          to { 
+            opacity: 1; 
+            transform: translateX(0); 
+          }
+        }
+        
+        .animate-fadeIn {
+          animation: fadeIn 1s ease-out;
+        }
+        
+        .animate-slideInUp {
+          animation: slideInUp 1s ease-out;
+        }
+        
+        .animate-slideInLeft {
+          animation: slideInLeft 1s ease-out;
+        }
+      `}</style>
     </div>
   );
 };
