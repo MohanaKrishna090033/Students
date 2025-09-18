@@ -270,7 +270,8 @@ test_plan:
     - "Student Onboarding System"
     - "Gamified Student Dashboard"
     - "Interactive Quest/Learning Page"
-  stuck_tasks: []
+  stuck_tasks:
+    - "Student Onboarding System"
   test_all: false
   test_priority: "high_first"
 
