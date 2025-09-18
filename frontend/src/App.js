@@ -729,6 +729,9 @@ const QuestPage = ({ quest, onBack, onComplete }) => {
   const [result, setResult] = useState(null);
   const [hint, setHint] = useState('');
   const [showHint, setShowHint] = useState(false);
+  const [selectedAnswer, setSelectedAnswer] = useState('');
+  const [showFeedback, setShowFeedback] = useState(false);
+  const [isCorrect, setIsCorrect] = useState(false);
   
   const currentQuestion = quest.questions[currentQuestionIndex];
   const isLastQuestion = currentQuestionIndex === quest.questions.length - 1;
@@ -745,7 +748,10 @@ const QuestPage = ({ quest, onBack, onComplete }) => {
       good: "Good Try!",
       completed: "Quest Completed!",
       retry: "Try Again",
-      continue: "Continue Learning"
+      continue: "Continue Learning",
+      correct: "Correct! 🎉",
+      incorrect: "Try again! 💪",
+      almostThere: "You're almost there!"
     },
     odia: {
       back: "← ଅନ୍ୱେଷଣକୁ ଫେରନ୍ତୁ",
@@ -758,17 +764,31 @@ const QuestPage = ({ quest, onBack, onComplete }) => {
       good: "ଭଲ ଚେଷ୍ଟା!",
       completed: "ଅନ୍ୱେଷଣ ସମ୍ପୂର୍ଣ୍ଣ!",
       retry: "ପୁନଃ ଚେଷ୍ଟା କରନ୍ତୁ",
-      continue: "ଶିଖିବା ଜାରି ରଖନ୍ତୁ"
+      continue: "ଶିଖିବା ଜାରି ରଖନ୍ତୁ",
+      correct: "ସଠିକ! 🎉",
+      incorrect: "ପୁନଃ ଚେଷ୍ଟା କର! 💪",
+      almostThere: "ତୁମେ ପ୍ରାୟ ପହଞ୍ଚିଗଲ!"
     }
   };
   
   const currentContent = content[language];
   
   const handleAnswer = (answer) => {
+    setSelectedAnswer(answer);
     setAnswers({
       ...answers,
       [currentQuestion.id]: answer
     });
+    
+    // Show immediate feedback
+    const correct = currentQuestion.correct_answer.toLowerCase() === answer.toLowerCase();
+    setIsCorrect(correct);
+    setShowFeedback(true);
+    
+    // Auto-hide feedback after 2 seconds
+    setTimeout(() => {
+      setShowFeedback(false);
+    }, 2000);
   };
   
   const handleNext = () => {
@@ -778,6 +798,8 @@ const QuestPage = ({ quest, onBack, onComplete }) => {
       setCurrentQuestionIndex(currentQuestionIndex + 1);
       setShowHint(false);
       setHint('');
+      setSelectedAnswer('');
+      setShowFeedback(false);
     }
   };
   
@@ -821,23 +843,51 @@ const QuestPage = ({ quest, onBack, onComplete }) => {
   
   if (showResult) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-green-400 to-blue-600 flex items-center justify-center px-6">
-        <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full text-center">
-          <div className="text-6xl mb-4">
+      <div className="min-h-screen bg-gradient-to-br from-green-400 to-blue-600 flex items-center justify-center px-6 relative overflow-hidden">
+        {/* Celebration Background */}
+        <div className="absolute inset-0">
+          {[...Array(20)].map((_, i) => (
+            <div
+              key={i}
+              className="absolute animate-bounce"
+              style={{
+                left: `${Math.random() * 100}%`,
+                top: `${Math.random() * 100}%`,
+                animationDelay: `${Math.random() * 2}s`,
+                fontSize: `${Math.random() * 20 + 20}px`,
+              }}
+            >
+              {['🎉', '⭐', '🏆', '✨', '🎊'][Math.floor(Math.random() * 5)]}
+            </div>
+          ))}
+        </div>
+        
+        <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full text-center relative z-10 transform animate-bounce">
+          <div className="text-8xl mb-4 animate-spin">
             {result.completed ? '🎉' : '💪'}
           </div>
-          <h2 className="text-3xl font-bold text-gray-800 mb-4">
+          <h2 className="text-3xl font-bold text-gray-800 mb-4 animate-pulse">
             {result.completed ? currentContent.excellent : currentContent.good}
           </h2>
-          <div className="space-y-2 mb-6">
-            <p className="text-lg">Score: {result.score}%</p>
-            <p className="text-lg">XP Earned: +{result.xp_earned}</p>
-            <p className="text-lg">Correct: {result.correct_answers}/{result.total_questions}</p>
+          <div className="space-y-3 mb-6">
+            <div className="bg-blue-100 p-3 rounded-lg">
+              <p className="text-xl font-bold text-blue-800">Score: {result.score}%</p>
+            </div>
+            <div className="bg-yellow-100 p-3 rounded-lg">
+              <p className="text-xl font-bold text-yellow-800">XP Earned: +{result.xp_earned}</p>
+            </div>
+            <div className="bg-green-100 p-3 rounded-lg">
+              <p className="text-lg text-green-800">Correct: {result.correct_answers}/{result.total_questions}</p>
+            </div>
             {result.new_badges.length > 0 && (
-              <div className="bg-yellow-100 p-3 rounded-lg">
-                <p className="font-bold text-yellow-800">New Badges! 🏆</p>
-                {result.new_badges.map(badge => (
-                  <p key={badge} className="text-yellow-700">{badge}</p>
+              <div className="bg-purple-100 p-4 rounded-lg animate-pulse">
+                <p className="font-bold text-purple-800 text-lg">New Badges! 🏆</p>
+                {result.new_badges.map((badge, index) => (
+                  <p key={badge} 
+                     className="text-purple-700 animate-bounce"
+                     style={{animationDelay: `${index * 0.3}s`}}>
+                    🎖️ {badge}
+                  </p>
                 ))}
               </div>
             )}
@@ -847,7 +897,9 @@ const QuestPage = ({ quest, onBack, onComplete }) => {
               onComplete();
               onBack();
             }}
-            className="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-4 rounded-lg transition-all duration-200"
+            className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 
+                       text-white font-bold py-4 px-6 rounded-lg transition-all duration-300 transform hover:scale-105
+                       shadow-lg hover:shadow-xl"
           >
             {currentContent.continue}
           </button>
@@ -857,85 +909,240 @@ const QuestPage = ({ quest, onBack, onComplete }) => {
   }
   
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-400 via-purple-500 to-pink-500">
-      {/* Header */}
-      <div className="bg-white bg-opacity-20 backdrop-blur p-6">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-400 via-purple-500 to-pink-500 relative overflow-hidden">
+      {/* Animated Background Elements */}
+      <div className="absolute inset-0 pointer-events-none">
+        {[...Array(10)].map((_, i) => (
+          <div
+            key={i}
+            className="absolute animate-float"
+            style={{
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              animationDelay: `${Math.random() * 5}s`,
+              animationDuration: `${Math.random() * 3 + 2}s`,
+            }}
+          >
+            <div className="text-2xl opacity-30">
+              {['⭐', '✨', '🌟', '💫'][Math.floor(Math.random() * 4)]}
+            </div>
+          </div>
+        ))}
+      </div>
+      
+      {/* Feedback Toast */}
+      {showFeedback && (
+        <div className={`fixed top-4 left-1/2 transform -translate-x-1/2 z-50 px-6 py-3 rounded-full font-bold text-white shadow-lg animate-bounce ${
+          isCorrect ? 'bg-green-500' : 'bg-orange-500'
+        }`}>
+          {isCorrect ? currentContent.correct : currentContent.incorrect}
+        </div>
+      )}
+      
+      {/* Enhanced Header */}
+      <div className="bg-white bg-opacity-20 backdrop-blur p-6 relative">
         <button
           onClick={onBack}
-          className="text-white hover:text-yellow-200 font-bold mb-4"
+          className="text-white hover:text-yellow-200 font-bold mb-4 flex items-center gap-2 
+                     transition-all duration-300 hover:scale-105"
         >
+          <span className="animate-bounce">←</span>
           {currentContent.back}
         </button>
-        <h1 className="text-3xl font-bold text-white mb-2">
+        <h1 className="text-4xl font-bold text-white mb-2 animate-slideInLeft">
           {language === 'english' ? quest.title : quest.title_odia}
         </h1>
-        <p className="text-yellow-200">
+        <p className="text-yellow-200 text-lg animate-slideInRight">
           {language === 'english' ? quest.story_context : quest.story_context_odia}
         </p>
-        <div className="mt-4 text-white font-bold">
-          {currentContent.question}
+        
+        {/* Progress Bar */}
+        <div className="mt-6">
+          <div className="flex justify-between text-white font-bold mb-2">
+            <span>{currentContent.question}</span>
+            <span>{Math.round(((currentQuestionIndex + 1) / quest.questions.length) * 100)}%</span>
+          </div>
+          <div className="bg-white bg-opacity-30 rounded-full h-3 overflow-hidden">
+            <div 
+              className="bg-gradient-to-r from-yellow-400 to-orange-500 h-full transition-all duration-500"
+              style={{ width: `${((currentQuestionIndex + 1) / quest.questions.length) * 100}%` }}
+            >
+              <div className="h-full bg-gradient-to-r from-transparent via-white to-transparent opacity-50 animate-pulse"></div>
+            </div>
+          </div>
         </div>
       </div>
       
-      {/* Question */}
+      {/* Enhanced Question Section */}
       <div className="p-6 flex-1 flex items-center justify-center">
-        <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-2xl w-full">
-          <h2 className="text-2xl font-bold text-gray-800 mb-6">
+        <div className="bg-white rounded-3xl shadow-2xl p-8 max-w-3xl w-full relative overflow-hidden">
+          {/* Card decoration */}
+          <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-purple-400 to-pink-400"></div>
+          
+          <h2 className="text-3xl font-bold text-gray-800 mb-6 text-center animate-slideInDown">
             {language === 'english' ? currentQuestion.question : currentQuestion.question_odia}
           </h2>
           
-          {/* Question Image */}
+          {/* Enhanced Question Image */}
           {currentQuestion.image_url && (
-            <img 
-              src={currentQuestion.image_url} 
-              alt="Question" 
-              className="w-full h-48 object-cover rounded-lg mb-6"
-            />
+            <div className="mb-8 text-center">
+              <img 
+                src={currentQuestion.image_url} 
+                alt="Question" 
+                className="w-full max-w-md h-64 object-cover rounded-xl mx-auto shadow-lg
+                          transform hover:scale-105 transition-all duration-300"
+              />
+            </div>
           )}
           
-          {/* Answer Options */}
-          <div className="space-y-3 mb-6">
-            {currentQuestion.options.map((option, index) => (
-              <button
-                key={index}
-                onClick={() => handleAnswer(option)}
-                className={`w-full p-4 text-left rounded-lg border-2 transition-all duration-200 ${
-                  answers[currentQuestion.id] === option
-                    ? 'border-blue-500 bg-blue-50 text-blue-800'
-                    : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
-                }`}
-              >
-                <span className="font-bold mr-3">{String.fromCharCode(65 + index)}.</span>
-                {option}
-              </button>
-            ))}
+          {/* Enhanced Answer Options */}
+          <div className="space-y-4 mb-8">
+            {currentQuestion.options.map((option, index) => {
+              const isSelected = answers[currentQuestion.id] === option;
+              const optionLetter = String.fromCharCode(65 + index);
+              
+              return (
+                <button
+                  key={index}
+                  onClick={() => handleAnswer(option)}
+                  className={`w-full p-6 text-left rounded-xl border-3 transition-all duration-300 transform hover:scale-102 ${
+                    isSelected
+                      ? 'border-blue-500 bg-blue-50 text-blue-800 shadow-lg scale-105'
+                      : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50 hover:shadow-md'
+                  }`}
+                >
+                  <div className="flex items-center">
+                    <span className={`inline-flex items-center justify-center w-10 h-10 rounded-full font-bold mr-4 transition-all duration-300 ${
+                      isSelected 
+                        ? 'bg-blue-500 text-white animate-bounce' 
+                        : 'bg-gray-200 text-gray-600'
+                    }`}>
+                      {optionLetter}
+                    </span>
+                    <span className="text-lg font-medium">{option}</span>
+                  </div>
+                </button>
+              );
+            })}
           </div>
           
-          {/* Hint Section */}
-          <div className="mb-6">
+          {/* Enhanced Hint Section */}
+          <div className="mb-8">
             <button
               onClick={getHint}
-              className="text-purple-600 hover:text-purple-800 font-bold flex items-center gap-2"
+              className="text-purple-600 hover:text-purple-800 font-bold flex items-center gap-2 
+                         transition-all duration-300 hover:scale-105"
             >
+              <span className="animate-bounce">💡</span>
               {showHint ? currentContent.hideHint : currentContent.hint}
             </button>
             {showHint && hint && (
-              <div className="mt-3 p-4 bg-yellow-50 border-l-4 border-yellow-400 rounded">
-                <p className="text-yellow-800">{hint}</p>
+              <div className="mt-4 p-6 bg-gradient-to-r from-yellow-50 to-orange-50 border-l-4 border-yellow-400 rounded-lg 
+                             animate-slideInUp shadow-lg">
+                <div className="flex items-start">
+                  <span className="text-2xl mr-3 animate-bounce">🧙‍♂️</span>
+                  <p className="text-yellow-800 font-medium">{hint}</p>
+                </div>
               </div>
             )}
           </div>
           
-          {/* Navigation */}
+          {/* Enhanced Navigation Button */}
           <button
             onClick={handleNext}
             disabled={!answers[currentQuestion.id]}
-            className="w-full bg-purple-500 hover:bg-purple-600 disabled:bg-gray-300 text-white font-bold py-3 px-4 rounded-lg transition-all duration-200 transform hover:scale-105 disabled:transform-none"
+            className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 
+                       disabled:from-gray-300 disabled:to-gray-400 text-white font-bold py-4 px-6 rounded-xl 
+                       transition-all duration-300 transform hover:scale-105 disabled:transform-none
+                       shadow-lg hover:shadow-xl disabled:shadow-none"
           >
-            {isLastQuestion ? currentContent.submit : currentContent.next}
+            <span className="flex items-center justify-center">
+              <span className="mr-2">
+                {isLastQuestion ? currentContent.submit : currentContent.next}
+              </span>
+              <span className="animate-bounce">
+                {isLastQuestion ? '🚀' : '➡️'}
+              </span>
+            </span>
           </button>
         </div>
       </div>
+      
+      {/* Enhanced CSS Animations */}
+      <style jsx>{`
+        @keyframes float {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-20px); }
+        }
+        
+        @keyframes slideInLeft {
+          from { 
+            opacity: 0; 
+            transform: translateX(-50px); 
+          }
+          to { 
+            opacity: 1; 
+            transform: translateX(0); 
+          }
+        }
+        
+        @keyframes slideInRight {
+          from { 
+            opacity: 0; 
+            transform: translateX(50px); 
+          }
+          to { 
+            opacity: 1; 
+            transform: translateX(0); 
+          }
+        }
+        
+        @keyframes slideInDown {
+          from { 
+            opacity: 0; 
+            transform: translateY(-30px); 
+          }
+          to { 
+            opacity: 1; 
+            transform: translateY(0); 
+          }
+        }
+        
+        @keyframes slideInUp {
+          from { 
+            opacity: 0; 
+            transform: translateY(30px); 
+          }
+          to { 
+            opacity: 1; 
+            transform: translateY(0); 
+          }
+        }
+        
+        .animate-float {
+          animation: float infinite ease-in-out;
+        }
+        
+        .animate-slideInLeft {
+          animation: slideInLeft 0.8s ease-out;
+        }
+        
+        .animate-slideInRight {
+          animation: slideInRight 0.8s ease-out;
+        }
+        
+        .animate-slideInDown {
+          animation: slideInDown 0.6s ease-out;
+        }
+        
+        .animate-slideInUp {
+          animation: slideInUp 0.6s ease-out;
+        }
+        
+        .hover\\:scale-102:hover {
+          transform: scale(1.02);
+        }
+      `}</style>
     </div>
   );
 };
