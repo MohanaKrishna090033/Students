@@ -15,17 +15,16 @@ import asyncio
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
-# MongoDB connection - temporarily using local MongoDB for testing due to Atlas SSL issues
-mongo_url = "mongodb://localhost:27017"  # Temporary fix for testing
-# mongo_url = os.environ['MONGO_URL']  # Original Atlas connection - has SSL handshake issues
+# MongoDB connection
+mongo_url = os.environ['MONGO_URL']
 # Add TLS options to handle SSL handshake issues in containerized environments
 client = AsyncIOMotorClient(
-    mongo_url
-    # tls=True,  # Disabled for local MongoDB
-    # tlsAllowInvalidCertificates=False,
-    # serverSelectionTimeoutMS=5000,
-    # connectTimeoutMS=5000,
-    # socketTimeoutMS=5000
+    mongo_url, 
+    tls=True, 
+    tlsAllowInvalidCertificates=False,
+    serverSelectionTimeoutMS=5000,
+    connectTimeoutMS=5000,
+    socketTimeoutMS=5000
 )
 db = client[os.environ['DB_NAME']]
 
