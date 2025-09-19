@@ -13,7 +13,10 @@ from enum import Enum
 import asyncio
 
 ROOT_DIR = Path(__file__).parent
-load_dotenv(ROOT_DIR / '.env')
+load_dotenv(str(ROOT_DIR / '.env'))
+print("MONGO_URL:", os.getenv('MONGO_URL'))
+print("DB_NAME:", os.getenv('DB_NAME'))
+print("EMERGENT_LLM_KEY:", os.getenv('EMERGENT_LLM_KEY'))
 
 # MongoDB connection
 mongo_url = os.environ['MONGO_URL']
